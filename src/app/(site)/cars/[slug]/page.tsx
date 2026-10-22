@@ -10,6 +10,7 @@ import { inr } from "@/lib/utils/pricing";
 import { CarCard } from "@/components/cars/CarCard";
 import { CarImage } from "@/components/cars/CarImage";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { PendingLink } from "@/components/ui/PendingLink";
 
 type Props = { params: Promise<{ slug: string }> };
 export const generateStaticParams = () => cars.map((c) => ({ slug: c.slug }));
@@ -59,7 +60,7 @@ export default async function CarPage({ params }: Props) {
         <aside className="hidden h-fit border border-line bg-white p-6 lg:sticky lg:top-24 lg:block" aria-label="Book this car">
           <p className="text-3xl font-semibold">{inr(car.pricePerDay)} <span className="text-base font-normal text-mute">/ day</span></p>
           <p className="mt-1 text-sm text-mute">Security deposit {inr(car.securityDeposit)}</p>
-          <Link href={`/booking?car=${car.slug}`} className="btn btn-dark mt-5 w-full">Book now</Link>
+          <PendingLink href={`/booking?car=${car.slug}`} variant="booking" className="btn btn-dark mt-5 w-full">Book now</PendingLink>
           <a href={carEnquiryLink(name)} className="btn btn-ghost mt-3 w-full"><MessageCircle size={18} aria-hidden /> WhatsApp enquiry</a>
         </aside>
       </div>
@@ -68,7 +69,7 @@ export default async function CarPage({ params }: Props) {
       <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-line bg-bone/95 p-3 backdrop-blur sm:gap-3 lg:hidden">
         <div className="min-w-0 flex-1"><p className="truncate font-semibold">{inr(car.pricePerDay)}<span className="text-xs font-normal text-mute"> / day</span></p></div>
         <a href={carEnquiryLink(name)} aria-label="WhatsApp enquiry" className="btn btn-ghost shrink-0 px-3"><MessageCircle size={18} /></a>
-        <Link href={`/booking?car=${car.slug}`} className="btn btn-dark shrink-0">Book now</Link>
+        <PendingLink href={`/booking?car=${car.slug}`} variant="booking" className="btn btn-dark shrink-0">Book now</PendingLink>
       </div>
     </div>
   );

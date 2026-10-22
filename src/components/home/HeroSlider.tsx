@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { site } from "@/lib/constants/site";
+import { PendingLink } from "@/components/ui/PendingLink";
 
 const slides = [
   { src: "/images/hero/slide-1.jpg", alt: "Black Scorpio self-drive rental on the highway" },
@@ -57,8 +57,8 @@ export function HeroSlider() {
         <p className="display rise rise-2 mt-3 max-w-xl text-xl text-bone/90 sm:mt-4 sm:text-3xl">Your city, your pace.</p>
         <p className="rise rise-3 mt-4 max-w-md text-base text-bone/75 sm:mt-5 sm:text-lg">Clean, well-kept cars you drive yourself — from a quick city run to a weekend away.</p>
         <div className="rise rise-3 mt-6 flex w-full flex-col gap-3 sm:mt-8 sm:w-auto sm:flex-row sm:flex-wrap">
-          <Link href="/cars" className="btn btn-primary w-full sm:w-auto">Explore cars</Link>
-          <Link href="/booking" className="btn btn-ghost w-full border-bone/50 text-bone sm:w-auto">Book your ride</Link>
+          <PendingLink href="/cars" className="btn btn-primary w-full sm:w-auto">Explore cars</PendingLink>
+          <PendingLink href="/booking" variant="booking" className="btn btn-ghost w-full border-bone/50 text-bone sm:w-auto">Book your ride</PendingLink>
         </div>
 
         <div className="mt-10 flex items-center gap-3" role="tablist" aria-label="Hero slides">

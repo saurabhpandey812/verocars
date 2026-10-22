@@ -2,6 +2,7 @@ import Link from "next/link";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { site } from "@/lib/constants/site";
 import { CarImage } from "@/components/cars/CarImage";
+import { PendingLink } from "@/components/ui/PendingLink";
 
 export const metadata = buildMetadata({
   title: "About Us",
@@ -94,12 +95,12 @@ export default function About() {
             <p className="mt-2 max-w-md text-bone/70">Browse the fleet, send a request, and we confirm availability personally.</p>
           </div>
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <Link href="/booking" className="btn btn-primary w-full sm:w-auto">
+            <PendingLink href="/booking" variant="booking" className="btn btn-primary w-full sm:w-auto">
               Book a car
-            </Link>
-            <Link href="/cars" className="btn btn-ghost w-full border-bone/40 sm:w-auto">
+            </PendingLink>
+            <PendingLink href="/cars" className="btn btn-ghost w-full border-bone/40 sm:w-auto">
               Explore fleet
-            </Link>
+            </PendingLink>
           </div>
         </div>
       </section>
