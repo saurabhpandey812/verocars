@@ -1,0 +1,10 @@
+---
+description: Always use Auto model; never use Grok or other non-Auto models
+alwaysApply: true
+---
+
+# Model Selection
+
+- Always use the **Auto** model for this project and for any subagents/tasks.
+- Never use Grok (or "agrook") models, including: `grok-*`, `cursor-grok-*`, or any Grok variant.
+- When spawning subagents, set model to `inherit` (Auto) — do not pick a different model unless the user explicitly asks for a non-Grok model by name.
