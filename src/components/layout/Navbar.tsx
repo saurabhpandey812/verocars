@@ -14,16 +14,27 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const overHero = pathname === "/" && !scrolled;
+  const isHome = pathname === "/";
+  const overHero = isHome && !scrolled;
 
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    const on = () => setScrolled(window.scrollY > 16);
-    on();
-    window.addEventListener("scroll", on, { passive: true });
-    return () => window.removeEventListener("scroll", on);
-  }, []);
+    let ticking = false;
+    const update = () => {
+      setScrolled(window.scrollY > 24);
+      ticking = false;
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [pathname]);
 
   useEffect(() => {
     const esc = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
@@ -83,16 +94,17 @@ export function Navbar() {
 
   return (
     <>
+      {!isHome && <div aria-hidden className="h-16 sm:h-[4.5rem]" />}
       <header
-        className={`z-40 border-b transition-all ${
+        className={`navbar-bar fixed inset-x-0 top-0 z-40 border-b ${
           overHero
-            ? "absolute inset-x-0 top-0 border-transparent bg-transparent text-bone"
+            ? "border-transparent bg-transparent text-bone shadow-none"
             : scrolled
-              ? "sticky top-0 border-line bg-bone/95 text-ink backdrop-blur"
-              : "sticky top-0 border-transparent bg-bone text-ink"
+              ? "border-line/80 bg-bone/90 text-ink shadow-[0_8px_30px_rgba(20,21,23,0.06)] backdrop-blur-md"
+              : "border-transparent bg-bone text-ink shadow-none"
         }`}
       >
-        <div className={`wrap flex items-center justify-between gap-3 transition-all ${scrolled ? "h-14" : "h-16 sm:h-[4.5rem]"}`}>
+        <div className={`wrap flex items-center justify-between gap-3 navbar-inner ${scrolled ? "is-compact" : ""}`}>
           <Link href="/" className="display min-w-0 truncate text-xl sm:text-2xl" aria-label={`${site.name} home`}>
             {site.name}
           </Link>

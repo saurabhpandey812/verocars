@@ -30,9 +30,28 @@ body { background: var(--color-bone); color: var(--color-ink); font-family: var(
 @keyframes drawer-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
 .drawer-panel { animation: drawer-in .28s ease-out both; }
 .drawer-backdrop { animation: drawer-backdrop-in .28s ease-out both; }
+.navbar-bar {
+  transition:
+    background-color .45s cubic-bezier(.22, 1, .36, 1),
+    border-color .45s cubic-bezier(.22, 1, .36, 1),
+    color .45s cubic-bezier(.22, 1, .36, 1),
+    box-shadow .45s cubic-bezier(.22, 1, .36, 1),
+    backdrop-filter .45s cubic-bezier(.22, 1, .36, 1),
+    -webkit-backdrop-filter .45s cubic-bezier(.22, 1, .36, 1);
+}
+.navbar-inner {
+  height: 4rem;
+  transition: height .45s cubic-bezier(.22, 1, .36, 1);
+}
+@media (min-width: 640px) {
+  .navbar-inner { height: 4.5rem; }
+  .navbar-inner.is-compact { height: 3.5rem; }
+}
+.navbar-inner.is-compact { height: 3.5rem; }
 @keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.06); } }
 .hero-kenburns { animation: kenburns 4.5s ease-out both; }
 @media (prefers-reduced-motion: reduce) {
   .rise, .hero-kenburns, .drawer-panel, .drawer-backdrop { animation: none; }
+  .navbar-bar, .navbar-inner { transition: none; }
   html { scroll-behavior: auto; }
 }
