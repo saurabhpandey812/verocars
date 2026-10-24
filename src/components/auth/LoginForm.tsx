@@ -30,7 +30,7 @@ export function LoginForm({ embed = false }: { embed?: boolean }) {
     setTouched({ identifier: true, password: true });
     const er = validateLogin(v);
     setErrors(er);
-    if (!Object.keys(er).length) void send({ identifier: v.identifier.trim() });
+    if (!Object.keys(er).length) void send({ identifier: v.identifier.trim(), password: v.password });
   }
 
   return (

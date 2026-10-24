@@ -30,7 +30,15 @@ export function RegisterForm({ embed = false }: { embed?: boolean }) {
     setTouched({ fullName: true, mobile: true, email: true, password: true, confirm: true });
     const er = validateRegister(v);
     setErrors(er);
-    if (!Object.keys(er).length) void send({ fullName: v.fullName.trim(), mobile: v.mobile.trim(), email: v.email.trim() });
+    if (!Object.keys(er).length) {
+      void send({
+        fullName: v.fullName.trim(),
+        mobile: v.mobile.trim(),
+        email: v.email.trim(),
+        password: v.password,
+        confirm: v.confirm,
+      });
+    }
   }
 
   return (

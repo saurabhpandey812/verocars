@@ -5,11 +5,13 @@ const CustomerSchema = new Schema(
     id: { type: String, required: true, unique: true, index: true },
     fullName: { type: String, required: true },
     mobile: { type: String, required: true },
-    email: { type: String, required: true },
+    email: { type: String, required: true, unique: true, index: true },
+    /** Plain text for now — encrypt later */
+    password: { type: String, default: "" },
     createdAt: { type: String, required: true },
     demo: { type: Boolean, default: false },
   },
-  { versionKey: false },
+  { versionKey: false, strict: false },
 );
 
 export type CustomerDoc = InferSchemaType<typeof CustomerSchema>;

@@ -10,7 +10,10 @@ declare global {
 export async function connectDB() {
   if (mongoose.connection.readyState === 1) return mongoose;
   if (!global.__mongooseConn) {
-    global.__mongooseConn = mongoose.connect(env.mongodbUri, { bufferCommands: false });
+    global.__mongooseConn = mongoose.connect(env.mongodbUri, {
+      bufferCommands: false,
+      family: 4,
+    });
   }
   return global.__mongooseConn;
 }

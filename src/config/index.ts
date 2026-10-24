@@ -9,8 +9,15 @@ export const MONGODB_URI =
 // Local Mongo — Atlas band karo to upar comment, ye uncomment:
 // export const MONGODB_URI = "mongodb://127.0.0.1:27017/verocars";
 
-export const NEXT_PUBLIC_SITE_URL = "http://localhost:3000";
+// Live
+export const NEXT_PUBLIC_SITE_URL = "https://verocars.vercel.app";
+// Local — live band karo to upar comment, ye uncomment:
+// export const NEXT_PUBLIC_SITE_URL = "http://localhost:3000";
+
 export const NEXT_PUBLIC_DEMO_ACCOUNT = false;
+
+/** Cookie signing for customer login sessions */
+export const SESSION_SECRET = "veyro-customer-session-change-me";
 
 // ============================================================
 // App use (change mat karo)
@@ -26,4 +33,5 @@ export const env = {
   siteUrl: publicEnv.siteUrl,
   demoAccount: NEXT_PUBLIC_DEMO_ACCOUNT,
   mongodbUri: MONGODB_URI,
+  sessionSecret: SESSION_SECRET,
 } as const;
