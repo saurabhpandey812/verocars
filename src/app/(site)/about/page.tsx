@@ -27,7 +27,7 @@ export default function About() {
           <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-transparent to-ink/40" />
         </div>
         <div className="wrap relative flex min-h-[58svh] flex-col justify-end pb-12 pt-28 sm:min-h-[64svh] sm:pb-16 sm:pt-32">
-          <p className="text-sm tracking-[0.2em] text-brass">VEYORA CARS · EST. LUCKNOW</p>
+          <p className="text-sm tracking-[0.2em] text-brass">VEYRO CARS · EST. LUCKNOW</p>
           <h1 className="display mt-3 max-w-3xl text-4xl leading-[1.05] sm:text-6xl md:text-7xl">
             Renting a car should feel straightforward.
           </h1>
@@ -74,7 +74,7 @@ export default function About() {
       <section className="bg-ink py-14 text-bone sm:py-20">
         <div className="wrap">
           <p className="text-xs font-semibold tracking-[0.18em] text-brass uppercase">What we stand for</p>
-          <h2 className="display mt-2 text-3xl sm:text-4xl md:text-5xl">The VEYORA standard</h2>
+          <h2 className="display mt-2 text-3xl sm:text-4xl md:text-5xl">The VEYRO standard</h2>
           <ul className="mt-10 grid gap-px bg-bone/15 sm:grid-cols-2">
             {values.map(([t, d], i) => (
               <li key={t} className="bg-ink p-6 sm:p-8">

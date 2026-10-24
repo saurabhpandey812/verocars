@@ -7,6 +7,8 @@ export interface Car {
   id: string;
   brand: string;
   model: string;
+  /** Vehicle registration / number plate (e.g. UP32 AB 1234) */
+  carNumber?: string;
   slug: string;
   category: CarCategory;
   year: number;
@@ -18,5 +20,6 @@ export interface Car {
   description: string;
   features: string[];
   images: { src: string; alt: string }[];
+  featured?: boolean;
   status: CarStatus;
 }

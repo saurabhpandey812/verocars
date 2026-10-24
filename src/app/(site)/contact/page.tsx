@@ -30,7 +30,7 @@ export default function Contact() {
           <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/40" />
         </div>
         <div className="wrap relative py-16 sm:py-20 lg:py-24">
-          <p className="text-sm tracking-[0.2em] text-brass">VEYORA CARS · LUCKNOW</p>
+          <p className="text-sm tracking-[0.2em] text-brass">VEYRO CARS · LUCKNOW</p>
           <h1 className="display mt-3 max-w-2xl text-4xl sm:text-5xl md:text-6xl">Talk to us</h1>
           <p className="mt-4 max-w-lg text-bone/75">
             Questions about a car, dates or documents? Reach us any way that suits you, or{" "}

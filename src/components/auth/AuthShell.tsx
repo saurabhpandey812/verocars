@@ -20,7 +20,7 @@ export function AuthShell({
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-ink/25" />
         <div className="absolute inset-0 bg-gradient-to-r from-ink/40 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-10 xl:p-14">
-          <p className="text-sm tracking-[0.2em] text-brass">VEYORA CARS</p>
+          <p className="text-sm tracking-[0.2em] text-brass">VEYRO CARS</p>
           <p className="display mt-3 max-w-md text-4xl text-bone xl:text-5xl">Your next drive starts here.</p>
           <p className="mt-4 max-w-sm text-bone/70">
             One account to request cars, track bookings and keep your details ready for the next trip across Lucknow.

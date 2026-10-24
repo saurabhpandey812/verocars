@@ -1,6 +1,8 @@
-import { cars } from "@/data/cars";
+import { getCars } from "@/data/cars";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { BookingFlow } from "@/components/booking/BookingFlow";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = buildMetadata({
   title: "Book a Self Drive Car in Lucknow",
@@ -10,6 +12,7 @@ export const metadata = buildMetadata({
 
 export default async function BookingPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const p = await searchParams;
+  const cars = await getCars();
   return (
     <div className="wrap py-12">
       <h1 className="display mb-6 text-4xl sm:mb-8 sm:text-5xl md:text-6xl">Book your car</h1>

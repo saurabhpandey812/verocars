@@ -6,7 +6,7 @@ export const metadata = buildMetadata({ title: "Reset your password", descriptio
 
 export default function Page() {
   return (
-    <AuthShell title="Reset your password" intro="Enter your email and we will send you a link to reset your password." eyebrow="VEYORA CARS">
+    <AuthShell title="Reset your password" intro="Enter your email and we will send you a link to reset your password." eyebrow="VEYRO CARS">
       <ForgotForm />
     </AuthShell>
   );

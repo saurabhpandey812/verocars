@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
-import { cars } from "@/data/cars";
+import { getFeaturedCars } from "@/data/cars";
 import { site } from "@/lib/constants/site";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { carListLd } from "@/lib/seo/jsonld";
@@ -10,6 +10,8 @@ import { CarImage } from "@/components/cars/CarImage";
 import { HeroSlider } from "@/components/home/HeroSlider";
 import { SearchWidget } from "@/components/home/SearchWidget";
 import { JsonLd } from "@/components/seo/JsonLd";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = buildMetadata({
   title: `Self Drive Car Rental in Lucknow | ${site.name}`,
@@ -23,10 +25,8 @@ const steps = [
   ["We confirm", "Our team calls to confirm availability. Payment is collected offline."],
 ];
 
-const featuredSlugs = ["scorpio", "swift-dzire", "victoris", "ertiga", "creta", "innova-crysta"];
-
-export default function Home() {
-  const featured = featuredSlugs.map((s) => cars.find((c) => c.slug.endsWith(s))).filter(Boolean) as typeof cars;
+export default async function Home() {
+  const featured = await getFeaturedCars(6);
   return (
     <>
       <div className="relative">

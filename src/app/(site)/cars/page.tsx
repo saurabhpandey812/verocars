@@ -1,8 +1,10 @@
-import { cars } from "@/data/cars";
+import { getCars } from "@/data/cars";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { breadcrumbLd, carListLd } from "@/lib/seo/jsonld";
 import { CarsExplorer } from "@/components/cars/CarsExplorer";
 import { JsonLd } from "@/components/seo/JsonLd";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = buildMetadata({
   title: "Self Drive Cars in Lucknow: Fleet and Daily Prices",
@@ -12,6 +14,7 @@ export const metadata = buildMetadata({
 
 export default async function CarsPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const p = await searchParams;
+  const cars = await getCars();
   const carry = new URLSearchParams(Object.entries({ loc: p.loc, from: p.from, fromT: p.fromT, to: p.to, toT: p.toT }).filter((e): e is [string, string] => !!e[1])).toString();
   return (
     <div className="wrap py-12">

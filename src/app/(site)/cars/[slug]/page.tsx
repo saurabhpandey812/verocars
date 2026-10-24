@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Check, MessageCircle } from "lucide-react";
-import { cars, getCarBySlug, getRelatedCars } from "@/data/cars";
+import { getAllCars, getCarBySlug, getRelatedCars } from "@/data/cars";
 import { site } from "@/lib/constants/site";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { breadcrumbLd, vehicleLd } from "@/lib/seo/jsonld";
@@ -13,10 +13,20 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { PendingLink } from "@/components/ui/PendingLink";
 
 type Props = { params: Promise<{ slug: string }> };
-export const generateStaticParams = () => cars.map((c) => ({ slug: c.slug }));
+
+export const dynamic = "force-dynamic";
+
+export async function generateStaticParams() {
+  try {
+    const cars = await getAllCars();
+    return cars.map((c) => ({ slug: c.slug }));
+  } catch {
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }: Props) {
-  const car = getCarBySlug((await params).slug);
+  const car = await getCarBySlug((await params).slug);
   if (!car) return {};
   const name = `${car.brand} ${car.model}`;
   return buildMetadata({
@@ -29,10 +39,10 @@ export async function generateMetadata({ params }: Props) {
 const rules = ["Valid driving licence and a government ID are required.", "Refundable security deposit is collected at pickup.", "Return with the same fuel level as pickup.", "Traffic fines during the rental are the renter’s responsibility.", "Late returns are charged per hour. [Confirm rates]"];
 
 export default async function CarPage({ params }: Props) {
-  const car = getCarBySlug((await params).slug);
-  if (!car) notFound();
+  const car = await getCarBySlug((await params).slug);
+  if (!car || car.status !== "available") notFound();
   const name = `${car.brand} ${car.model}`;
-  const related = getRelatedCars(car.slug);
+  const related = await getRelatedCars(car.slug);
   const specs: [string, string][] = [["Seats", String(car.seats)], ["Transmission", car.transmission], ["Fuel", car.fuel], ["Year", String(car.year)], ["Air conditioning", "Yes"]];
 
   return (

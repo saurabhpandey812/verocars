@@ -1,8 +1,10 @@
+import { publicEnv } from "@/config";
+
 // Single source of truth for business details. Replace placeholders here only.
 export const site = {
-  name: "VEYORA CARS",
+  name: "VEYRO CARS",
   tagline: "Drive your way, across Lucknow.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.example.com",
+  url: publicEnv.siteUrl,
   phone: "+91-00000-00000",
   whatsapp: "910000000000", // country code + number, no symbols
   email: "hello@example.com",

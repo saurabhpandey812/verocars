@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Field } from "@/components/ui/Field";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { validateLogin } from "@/lib/validations/auth";
 import { useAuthSubmit } from "./useAuthSubmit";
 
@@ -45,10 +46,9 @@ export function LoginForm({ embed = false }: { embed?: boolean }) {
         error={errors.identifier}
         placeholder="name@email.com or 98xxxxxxxx"
       />
-      <Field
+      <PasswordField
         id="password"
         label="Password"
-        type="password"
         autoComplete="current-password"
         required
         value={v.password}

@@ -1,12 +1,12 @@
 import Link from "next/link";
 import type { Booking } from "@/types/booking";
-import { getCarBySlug } from "@/data/cars";
+import { getAllCars } from "@/data/cars";
 import { inr } from "@/lib/utils/pricing";
 import { StatusBadge } from "./StatusBadge";
 
 const fmt = (iso: string) => new Date(iso).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
 
-export function BookingList({ bookings, empty }: { bookings: Booking[]; empty: string }) {
+export async function BookingList({ bookings, empty }: { bookings: Booking[]; empty: string }) {
   if (!bookings.length)
     return (
       <div className="border border-dashed border-line p-8 text-center">
@@ -14,21 +14,38 @@ export function BookingList({ bookings, empty }: { bookings: Booking[]; empty: s
         <Link href="/cars" className="btn btn-dark mt-4 min-h-10">Browse cars</Link>
       </div>
     );
+
+  const cars = await getAllCars();
+  const name = (slug: string) => {
+    const c = cars.find((x) => x.slug === slug);
+    return c ? `${c.brand} ${c.model}` : slug;
+  };
+
   return (
-    <ul className="divide-y divide-line border border-line bg-white">
-      {bookings.map((b) => {
-        const car = getCarBySlug(b.carSlug);
-        return (
-          <li key={b.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
-            <div>
-              <p className="font-semibold">{car ? `${car.brand} ${car.model}` : b.carSlug}</p>
-              <p className="text-sm text-mute">{fmt(b.pickupAt)} to {fmt(b.returnAt)}</p>
-              <p className="text-xs text-mute">Ref {b.id}</p>
-            </div>
-            <div className="text-right"><StatusBadge status={b.status} /><p className="mt-1 text-sm">{inr(b.estimatedTotal)} est.</p></div>
-          </li>
-        );
-      })}
-    </ul>
+    <div className="overflow-x-auto border border-line bg-white">
+      <table className="w-full min-w-[36rem] text-left text-sm">
+        <thead className="border-b border-line text-xs text-mute">
+          <tr>
+            <th className="p-3">Car</th>
+            <th>Dates</th>
+            <th>Ref</th>
+            <th className="pr-3 text-right">Status / estimate</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-line">
+          {bookings.map((b) => (
+            <tr key={b.id}>
+              <td className="p-3 font-semibold">{name(b.carSlug)}</td>
+              <td className="py-3 text-mute">{fmt(b.pickupAt)} to {fmt(b.returnAt)}</td>
+              <td className="py-3 text-xs text-mute">{b.id}</td>
+              <td className="py-3 pr-3 text-right">
+                <StatusBadge status={b.status} />
+                <p className="mt-1 text-sm">{inr(b.estimatedTotal)} est.</p>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

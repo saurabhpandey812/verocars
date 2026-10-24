@@ -18,5 +18,7 @@ export interface Booking extends BookingRequest {
   userId: string;
   status: BookingStatus;
   estimatedTotal: number;
+  rentalAmount?: number;
+  demo?: boolean;
   createdAt: string;
 }
