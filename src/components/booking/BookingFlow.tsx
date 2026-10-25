@@ -48,8 +48,18 @@ export function BookingFlow({ cars, init }: { cars: Car[]; init: Init }) {
   if (done) return (
     <div className="mx-auto max-w-lg py-12 text-center sm:py-16">
       <h2 className="display text-4xl sm:text-5xl">Request sent.</h2>
-      <p className="mt-3 text-mute">Reference <strong>{done}</strong>. Our team will contact you on {c.mobile} to confirm availability. Payment is collected offline.</p>
-      <Link href="/cars" className="btn btn-dark mt-6 w-full sm:w-auto">Browse more cars</Link>
+      <p className="mt-3 text-mute">
+        Reference <strong>{done}</strong> is saved. Our team will confirm on {c.mobile}. Payment is collected offline.
+      </p>
+      <p className="mt-2 text-sm text-mute">You can track status anytime from My account after signing in with the same email.</p>
+      <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
+        <Link href="/account/bookings" className="btn btn-dark w-full sm:w-auto">
+          My bookings
+        </Link>
+        <Link href="/cars" className="btn btn-ghost w-full sm:w-auto">
+          Browse more cars
+        </Link>
+      </div>
     </div>
   );
 
