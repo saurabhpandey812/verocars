@@ -3,6 +3,7 @@ import type { Car } from "@/types/car";
 import type { Booking, BookingRequest } from "@/types/booking";
 import { seedCars } from "@/data/seed-cars";
 import { estimate } from "@/lib/utils/pricing";
+import { carBookedForRange, toWindow } from "@/lib/availability";
 import { connectDB } from "./mongo";
 import { CarModel } from "./models/car";
 import { BookingModel } from "./models/booking";
@@ -36,38 +37,26 @@ export async function createBooking(body: BookingRequest): Promise<Booking> {
   const carDoc = strip(car as unknown as Car);
   if (carDoc.status !== "available") throw new Error("That car is not available right now.");
 
+  const blocking = await BookingModel.find({
+    carSlug: body.carSlug,
+    status: { $in: ["pending", "confirmed"] },
+  }).lean();
+  const windows = blocking.map((b) => toWindow(strip(b as unknown as Booking)));
+  if (carBookedForRange(body.carSlug, windows, body.pickupAt, body.returnAt)) {
+    throw new Error("That car is already booked for these dates.");
+  }
+
   const { rental, total } = estimate(carDoc, body.pickupAt.slice(0, 10), body.returnAt.slice(0, 10));
 
   const email = body.email.trim().toLowerCase();
   const session = await getSessionCustomer().catch(() => null);
+  if (!session) throw new Error("Please sign in to book a car.");
 
-  let userId: string;
-  if (session) {
-    userId = session.id;
-    await CustomerModel.updateOne(
-      { id: userId },
-      { $set: { fullName: body.fullName.trim(), mobile: body.mobile.trim(), email } },
-    );
-  } else {
-    const existing = await CustomerModel.findOne({ email }).lean();
-    if (!existing) {
-      userId = `cus_${Date.now().toString(36)}`;
-      await CustomerModel.create({
-        id: userId,
-        fullName: body.fullName.trim(),
-        mobile: body.mobile.trim(),
-        email,
-        password: "",
-        createdAt: new Date().toISOString(),
-      });
-    } else {
-      userId = String(existing.id);
-      await CustomerModel.updateOne(
-        { id: userId },
-        { $set: { fullName: body.fullName.trim(), mobile: body.mobile.trim() } },
-      );
-    }
-  }
+  const userId = session.id;
+  await CustomerModel.updateOne(
+    { id: userId },
+    { $set: { fullName: body.fullName.trim(), mobile: body.mobile.trim(), email } },
+  );
 
   const booking: Booking = {
     ...body,
@@ -86,5 +75,12 @@ export async function createBooking(body: BookingRequest): Promise<Booking> {
 export async function readBookingsForUser(userId: string): Promise<Booking[]> {
   await connectDB();
   const rows = await BookingModel.find({ userId }).sort({ createdAt: -1 }).lean();
+  return rows.map((b) => strip(b as unknown as Booking));
+}
+
+/** Pending + confirmed bookings used for availability checks. */
+export async function readBlockingBookings(): Promise<Booking[]> {
+  await connectDB();
+  const rows = await BookingModel.find({ status: { $in: ["pending", "confirmed"] } }).lean();
   return rows.map((b) => strip(b as unknown as Booking));
 }

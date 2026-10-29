@@ -1,5 +1,4 @@
 import type { User } from "@/types/user";
-import { SignOutButton } from "./SignOutButton";
 
 export function ProfileCard({ user }: { user: User }) {
   return (
@@ -21,7 +20,7 @@ export function ProfileCard({ user }: { user: User }) {
           </div>
         ))}
       </dl>
-      <SignOutButton />
+      <p className="mt-4 text-sm text-mute">Member since {new Date(user.createdAt).toLocaleDateString("en-IN", { dateStyle: "medium" })}</p>
     </section>
   );
 }

@@ -6,7 +6,7 @@ import { RegisterForm } from "./RegisterForm";
 
 type Tab = "signin" | "signup";
 
-export function AuthTabs({ initial = "signin" }: { initial?: Tab }) {
+export function AuthTabs({ initial = "signin", next }: { initial?: Tab; next?: string }) {
   const [tab, setTab] = useState<Tab>(initial);
 
   return (
@@ -35,7 +35,7 @@ export function AuthTabs({ initial = "signin" }: { initial?: Tab }) {
       </div>
 
       <div role="tabpanel" aria-labelledby={`tab-${tab}`} key={tab}>
-        {tab === "signin" ? <LoginForm embed /> : <RegisterForm embed />}
+        {tab === "signin" ? <LoginForm embed next={next} /> : <RegisterForm embed next={next} />}
       </div>
     </div>
   );

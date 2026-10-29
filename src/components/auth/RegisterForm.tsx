@@ -8,11 +8,12 @@ import { useAuthSubmit } from "./useAuthSubmit";
 
 type Values = { fullName: string; mobile: string; email: string; password: string; confirm: string };
 
-export function RegisterForm({ embed = false }: { embed?: boolean }) {
+export function RegisterForm({ embed = false, next }: { embed?: boolean; next?: string }) {
   const [v, setV] = useState<Values>({ fullName: "", mobile: "", email: "", password: "", confirm: "" });
   const [errors, setErrors] = useState<ReturnType<typeof validateRegister>>({});
   const [touched, setTouched] = useState<Partial<Record<keyof Values, boolean>>>({});
-  const { busy, notice, send } = useAuthSubmit("register");
+  const { busy, notice, send } = useAuthSubmit("register", next);
+  const loginHref = next ? `/login?next=${encodeURIComponent(next)}` : "/login";
 
   const set = (k: keyof Values) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const next = { ...v, [k]: e.target.value };
@@ -59,7 +60,7 @@ export function RegisterForm({ embed = false }: { embed?: boolean }) {
       {!embed && (
         <p className="text-sm text-mute">
           Already have an account?{" "}
-          <Link href="/login" className="underline underline-offset-2">
+          <Link href={loginHref} className="underline underline-offset-2">
             Sign in
           </Link>
         </p>

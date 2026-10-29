@@ -1,14 +1,18 @@
 import type { BookingRequest } from "@/types/booking";
 import { validateEmail, validateLicence, validateMobile, validateName } from "./common";
+import { datePart, localToday } from "@/lib/utils/date";
 
 export type Errors = Partial<Record<keyof BookingRequest, string>>;
 
 export function validateTrip(v: Pick<BookingRequest, "pickupLocation" | "pickupAt" | "returnAt">): Errors {
   const e: Errors = {};
+  const today = localToday();
   if (!v.pickupLocation?.trim()) e.pickupLocation = "Choose a pickup location.";
   if (!v.pickupAt || v.pickupAt.startsWith("T") || v.pickupAt.endsWith("T")) e.pickupAt = "Choose a pickup date and time.";
+  else if (datePart(v.pickupAt) < today) e.pickupAt = "Pickup cannot be in the past.";
   if (!v.returnAt || v.returnAt.startsWith("T") || v.returnAt.endsWith("T")) e.returnAt = "Choose a return date and time.";
   else if (!e.pickupAt && v.returnAt <= v.pickupAt) e.returnAt = "Return must be after pickup.";
+  else if (datePart(v.returnAt) < today) e.returnAt = "Return cannot be in the past.";
   return e;
 }
 

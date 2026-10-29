@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function useAuthSubmit(action: "login" | "register" | "forgot-password") {
+export function useAuthSubmit(action: "login" | "register" | "forgot-password", next?: string) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
@@ -16,7 +16,7 @@ export function useAuthSubmit(action: "login" | "register" | "forgot-password") 
       const res = await fetch(`/api/auth/${action}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(next ? { ...body, next } : body),
       });
       const json = (await res.json()) as { ok?: boolean; message?: string; redirect?: string };
       setOk(Boolean(json.ok));

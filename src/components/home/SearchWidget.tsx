@@ -2,14 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-/** Local calendar date as YYYY-MM-DD (avoids UTC vs local hydration mismatch). */
-function localToday() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
+import { localToday } from "@/lib/utils/date";
 
 const places = ["Lucknow city (Gomti Nagar)", "Hazratganj", "Alambagh", "Airport area (if offered)"];
 
@@ -27,7 +20,9 @@ export function SearchWidget() {
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
+    const today = minDate || localToday();
     if (!v.from || !v.to) return setError("Choose pickup and return dates.");
+    if (v.from < today) return setError("Pickup cannot be in the past.");
     if (`${v.to}T${v.toT}` <= `${v.from}T${v.fromT}`) return setError("Return must be after pickup.");
     setError("");
     router.push(`/cars?${new URLSearchParams({ loc: v.loc, from: v.from, fromT: v.fromT, to: v.to, toT: v.toT })}`);

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { clearCustomerSession, loginCustomer, registerCustomer } from "@/server/auth";
+import { safeNextPath } from "@/lib/auth/safe-next";
 import { validateEmailOnly, validateLogin, validateRegister } from "@/lib/validations/auth";
 
 type Action = "login" | "register" | "forgot-password" | "logout";
@@ -16,6 +17,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ action: string
     return NextResponse.json({ ok: true, message: "Signed out.", redirect: "/" });
   }
 
+  const next = safeNextPath(body?.next);
+
   if (action === "register") {
     const v = {
       fullName: String(body?.fullName ?? ""),
@@ -30,7 +33,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ action: string
     }
     const result = await registerCustomer(v);
     if (!result.ok) return NextResponse.json({ ok: false, message: result.error }, { status: 400 });
-    return NextResponse.json({ ok: true, message: "Account created.", redirect: "/account", user: result.user });
+    return NextResponse.json({ ok: true, message: "Account created.", redirect: next, user: result.user });
   }
 
   if (action === "login") {
@@ -44,7 +47,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ action: string
     }
     const result = await loginCustomer(v);
     if (!result.ok) return NextResponse.json({ ok: false, message: result.error }, { status: 401 });
-    return NextResponse.json({ ok: true, message: "Signed in.", redirect: "/account", user: result.user });
+    return NextResponse.json({ ok: true, message: "Signed in.", redirect: next, user: result.user });
   }
 
   if (action === "forgot-password") {

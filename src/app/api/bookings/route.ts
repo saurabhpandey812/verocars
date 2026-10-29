@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import { getCarBySlug } from "@/data/cars";
 import { createBooking } from "@/server/db";
+import { getSessionCustomer } from "@/server/auth";
 import { validateCustomer, validateTrip } from "@/lib/validations/booking";
 import type { BookingRequest } from "@/types/booking";
 
 export async function POST(req: Request) {
+  const session = await getSessionCustomer().catch(() => null);
+  if (!session) {
+    return NextResponse.json({ error: "Please sign in to book a car." }, { status: 401 });
+  }
+
   const body = (await req.json().catch(() => null)) as BookingRequest | null;
   if (!body) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
 
@@ -26,6 +32,10 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error("[api/bookings]", err);
     const message = err instanceof Error ? err.message : "Could not save booking. Please try again.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    if (/sign in/i.test(message)) {
+      return NextResponse.json({ error: message }, { status: 401 });
+    }
+    const conflict = /already booked|not available/i.test(message);
+    return NextResponse.json({ error: message }, { status: conflict ? 409 : 500 });
   }
 }

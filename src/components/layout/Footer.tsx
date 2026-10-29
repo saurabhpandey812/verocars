@@ -3,7 +3,7 @@ import { site } from "@/lib/constants/site";
 import { whatsappLink } from "@/lib/utils/whatsapp";
 
 const cols = [
-  { h: "Rent", l: [["Cars", "/cars"], ["Book a car", "/booking"]] },
+  { h: "Rent", l: [["Cars", "/cars"], ["Book a car", "/booking"], ["My bookings", "/account/bookings"]] },
   { h: "Company", l: [["About", "/about"], ["Contact", "/contact"]] },
   { h: "Legal", l: [["Terms", "/terms"], ["Privacy policy", "/privacy-policy"]] },
 ] as const;

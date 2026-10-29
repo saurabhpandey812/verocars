@@ -1,21 +1,32 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Menu, X } from "lucide-react";
 import { site } from "@/lib/constants/site";
 import { PendingLink } from "@/components/ui/PendingLink";
+import { UserProfileMenu } from "@/components/account/UserProfileMenu";
 
-const links = [{ href: "/", label: "Home" }, { href: "/cars", label: "Cars" }, { href: "/about", label: "About" }, { href: "/contact", label: "Contact" }];
+const links = [
+  { href: "/", label: "Home" },
+  { href: "/cars", label: "Cars" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
 
-export function Navbar() {
+type NavUser = { fullName: string; email: string };
+
+export function Navbar({ user = null }: { user?: NavUser | null }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const isHome = pathname === "/";
   const overHero = isHome && !scrolled;
+  const signedIn = Boolean(user);
 
   useEffect(() => setMounted(true), []);
 
@@ -45,6 +56,20 @@ export function Navbar() {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  const linkHover = overHero ? "hover:text-brass" : "hover:text-brass-d";
+
+  async function signOut() {
+    setSigningOut(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setOpen(false);
+      router.push("/");
+      router.refresh();
+    } finally {
+      setSigningOut(false);
+    }
+  }
 
   const drawer =
     open &&
@@ -80,9 +105,28 @@ export function Navbar() {
                 {l.label}
               </Link>
             ))}
-            <Link href="/login" onClick={() => setOpen(false)}>
-              Login
-            </Link>
+            {signedIn ? (
+              <>
+                <Link href="/account" onClick={() => setOpen(false)}>
+                  Profile
+                </Link>
+                <Link href="/account/bookings" onClick={() => setOpen(false)}>
+                  Bookings
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => void signOut()}
+                  disabled={signingOut}
+                  className="text-left disabled:opacity-60"
+                >
+                  {signingOut ? "Signing out…" : "Sign out"}
+                </button>
+              </>
+            ) : (
+              <Link href="/login" onClick={() => setOpen(false)}>
+                Login
+              </Link>
+            )}
           </nav>
           <PendingLink href="/booking" variant="booking" onClick={() => setOpen(false)} className="btn btn-primary mt-auto w-full">
             Book now
@@ -110,26 +154,32 @@ export function Navbar() {
           </Link>
           <nav aria-label="Main" className="hidden items-center gap-6 text-sm font-medium lg:flex xl:gap-8">
             {links.map((l) => (
-              <Link key={l.href} href={l.href} className={overHero ? "hover:text-brass" : "hover:text-brass-d"}>
+              <Link key={l.href} href={l.href} className={linkHover}>
                 {l.label}
               </Link>
             ))}
-            <Link href="/login" className={overHero ? "hover:text-brass" : "hover:text-brass-d"}>
-              Login
-            </Link>
+            {!signedIn && (
+              <Link href="/login" className={linkHover}>
+                Login
+              </Link>
+            )}
             <PendingLink href="/booking" variant="booking" className={`btn min-h-10 ${overHero ? "btn-primary" : "btn-dark"}`}>
               Book now
             </PendingLink>
+            {user && <UserProfileMenu name={user.fullName} email={user.email} overHero={overHero} />}
           </nav>
-          <button
-            type="button"
-            className="inline-flex min-h-11 min-w-11 items-center justify-center lg:hidden"
-            onClick={() => setOpen(true)}
-            aria-label="Open menu"
-            aria-expanded={open}
-          >
-            <Menu />
-          </button>
+          <div className="flex items-center gap-2 lg:hidden">
+            {user && <UserProfileMenu name={user.fullName} email={user.email} overHero={overHero} />}
+            <button
+              type="button"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center"
+              onClick={() => setOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={open}
+            >
+              <Menu />
+            </button>
+          </div>
         </div>
       </header>
       {drawer}

@@ -1,9 +1,12 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Car } from "@/types/car";
 import type { BookingRequest } from "@/types/booking";
+import type { BookingWindow } from "@/lib/availability";
+import { carBookedForRange } from "@/lib/availability";
 import { estimate, inr } from "@/lib/utils/pricing";
+import { localToday } from "@/lib/utils/date";
 import { validateCustomer, validateTrip, type Errors } from "@/lib/validations/booking";
 
 const steps = [
@@ -14,23 +17,64 @@ const steps = [
 ] as const;
 const places = ["Lucknow city (Gomti Nagar)", "Hazratganj", "Alambagh", "Airport area (if offered)"];
 type Init = { car?: string; loc?: string; from?: string; fromT?: string; to?: string; toT?: string };
+type PrefillUser = { fullName: string; mobile: string; email: string };
 
-export function BookingFlow({ cars, init }: { cars: Car[]; init: Init }) {
+export function BookingFlow({
+  cars,
+  blocks,
+  init,
+  user,
+}: {
+  cars: Car[];
+  blocks: BookingWindow[];
+  init: Init;
+  user?: PrefillUser;
+}) {
   const [step, setStep] = useState(init.car ? 1 : 0);
   const [slug, setSlug] = useState(init.car ?? "");
   const [d, setD] = useState({ loc: init.loc ?? places[0], from: init.from ?? "", fromT: init.fromT ?? "10:00", to: init.to ?? "", toT: init.toT ?? "10:00" });
-  const [c, setC] = useState({ fullName: "", mobile: "", email: "", drivingLicenceNumber: "", idProofType: "aadhaar" as BookingRequest["idProofType"], message: "" });
+  const [c, setC] = useState({
+    fullName: user?.fullName ?? "",
+    mobile: user?.mobile ?? "",
+    email: user?.email ?? "",
+    drivingLicenceNumber: "",
+    idProofType: "aadhaar" as BookingRequest["idProofType"],
+    message: "",
+  });
   const [errors, setErrors] = useState<Errors>({});
   const [busy, setBusy] = useState(false);
   const [fail, setFail] = useState("");
   const [done, setDone] = useState("");
+  const [minDate, setMinDate] = useState("");
+
+  useEffect(() => {
+    const today = localToday();
+    setMinDate(today);
+    setD((prev) => ({
+      ...prev,
+      from: prev.from && prev.from < today ? "" : prev.from,
+      to: prev.to && prev.to < today ? "" : prev.to,
+    }));
+  }, []);
 
   const car = cars.find((x) => x.slug === slug);
   const req: BookingRequest = { carSlug: slug, pickupLocation: d.loc, pickupAt: `${d.from}T${d.fromT}`, returnAt: `${d.to}T${d.toT}`, ...c };
   const est = car && d.from && d.to ? estimate(car, d.from, d.to) : null;
+  const tripBooked = useMemo(
+    () => Boolean(slug && d.from && d.to && carBookedForRange(slug, blocks, `${d.from}T${d.fromT}`, `${d.to}T${d.toT}`)),
+    [blocks, slug, d.from, d.fromT, d.to, d.toT],
+  );
+
+  useEffect(() => {
+    if (tripBooked && step === 0) setSlug("");
+  }, [tripBooked, step]);
 
   function next() {
-    const e = step === 0 ? (slug ? {} : { carSlug: "Choose a car to continue." }) : step === 1 ? validateTrip(req) : step === 2 ? validateCustomer(req) : {};
+    let e: Errors =
+      step === 0 ? (slug ? {} : { carSlug: "Choose a car to continue." }) : step === 1 ? validateTrip(req) : step === 2 ? validateCustomer(req) : {};
+    if (step === 1 && !Object.keys(e).length && tripBooked) {
+      e = { pickupAt: "This car is already booked for these dates. Pick other dates or another car." };
+    }
     setErrors(e);
     if (!Object.keys(e).length) setStep(step + 1);
   }
@@ -39,6 +83,10 @@ export function BookingFlow({ cars, init }: { cars: Car[]; init: Init }) {
     try {
       const res = await fetch("/api/bookings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req) });
       const json = await res.json();
+      if (res.status === 401) {
+        window.location.href = `/login?next=${encodeURIComponent("/booking")}`;
+        return;
+      }
       if (!res.ok) throw new Error(json.error ?? "Please check your details and try again.");
       setDone(json.id);
     } catch (err) { setFail(err instanceof Error ? err.message : "Something went wrong. Please try again."); }
@@ -51,7 +99,7 @@ export function BookingFlow({ cars, init }: { cars: Car[]; init: Init }) {
       <p className="mt-3 text-mute">
         Reference <strong>{done}</strong> is saved. Our team will confirm on {c.mobile}. Payment is collected offline.
       </p>
-      <p className="mt-2 text-sm text-mute">You can track status anytime from My account after signing in with the same email.</p>
+      <p className="mt-2 text-sm text-mute">Track this request anytime from My bookings.</p>
       <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
         <Link href="/account/bookings" className="btn btn-dark w-full sm:w-auto">
           My bookings
@@ -85,26 +133,61 @@ export function BookingFlow({ cars, init }: { cars: Car[]; init: Init }) {
 
         {step === 0 && (
           <fieldset><legend className="display mb-4 text-2xl sm:text-3xl">Choose your car</legend>
-            <div className="grid gap-3">{cars.map((x) => (
-              <label key={x.id} className={`flex cursor-pointer flex-col gap-2 border bg-white p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4 ${slug === x.slug ? "border-brass" : "border-line"}`}>
+            {d.from && d.to && <p className="mb-3 text-sm text-mute">Showing availability for {d.from} → {d.to}. Booked cars are disabled.</p>}
+            <div className="grid gap-3">{cars.map((x) => {
+              const taken = Boolean(d.from && d.to && carBookedForRange(x.slug, blocks, `${d.from}T${d.fromT}`, `${d.to}T${d.toT}`));
+              return (
+              <label key={x.id} className={`flex flex-col gap-2 border bg-white p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4 ${taken ? "cursor-not-allowed opacity-60" : "cursor-pointer"} ${slug === x.slug ? "border-brass" : "border-line"}`}>
                 <span className="flex min-w-0 items-start gap-3 sm:items-center">
-                  <input type="radio" name="car" checked={slug === x.slug} onChange={() => setSlug(x.slug)} className="mt-1 accent-brass sm:mt-0" />
+                  <input type="radio" name="car" checked={slug === x.slug} disabled={taken} onChange={() => setSlug(x.slug)} className="mt-1 accent-brass sm:mt-0" />
                   <span className="min-w-0">
                     <span className="font-semibold">{x.brand} {x.model}</span>
-                    <span className="block text-sm text-mute">{x.category} · {x.seats} seats · {x.transmission}</span>
+                    <span className="block text-sm text-mute">{x.category} · {x.seats} seats · {x.transmission}{taken ? " · Unavailable" : ""}</span>
                   </span>
                 </span>
-                <span className="pl-7 text-sm font-semibold sm:pl-0">{inr(x.pricePerDay)}/day</span>
-              </label>))}</div>
+                <span className="pl-7 text-sm font-semibold sm:pl-0">{taken ? "Unavailable" : `${inr(x.pricePerDay)}/day`}</span>
+              </label>);
+            })}</div>
             {errors.carSlug && <p role="alert" className="err">{errors.carSlug}</p>}</fieldset>
         )}
 
         {step === 1 && (
           <div className="grid gap-4 sm:grid-cols-2"><h2 className="display text-2xl sm:col-span-2 sm:text-3xl">Dates and pickup</h2>
             <div className="sm:col-span-2">{F("loc", "Pickup location", <select id="loc" className={fieldCls(errors.pickupLocation)} value={d.loc} onChange={(e) => setD({ ...d, loc: e.target.value })}>{places.map((p) => <option key={p}>{p}</option>)}</select>, errors.pickupLocation, true)}</div>
-            {F("from", "Pickup date", <input id="from" type="date" required className={fieldCls(errors.pickupAt)} value={d.from} onChange={(e) => setD({ ...d, from: e.target.value })} />, errors.pickupAt, true)}
+            {F(
+              "from",
+              "Pickup date",
+              <input
+                id="from"
+                type="date"
+                required
+                min={minDate || undefined}
+                className={fieldCls(errors.pickupAt)}
+                value={d.from}
+                onChange={(e) => {
+                  const from = e.target.value;
+                  setD((prev) => ({ ...prev, from, to: prev.to && prev.to < from ? "" : prev.to }));
+                }}
+              />,
+              errors.pickupAt,
+              true,
+            )}
             {F("fromT", "Pickup time", <input id="fromT" type="time" required className={fieldCls()} value={d.fromT} onChange={(e) => setD({ ...d, fromT: e.target.value })} />, undefined, true)}
-            {F("to", "Return date", <input id="to" type="date" required className={fieldCls(errors.returnAt)} value={d.to} onChange={(e) => setD({ ...d, to: e.target.value })} />, errors.returnAt, true)}
+            {F(
+              "to",
+              "Return date",
+              <input
+                id="to"
+                type="date"
+                required
+                min={d.from || minDate || undefined}
+                className={fieldCls(errors.returnAt)}
+                value={d.to}
+                onChange={(e) => setD({ ...d, to: e.target.value })}
+              />,
+              errors.returnAt,
+              true,
+            )}
             {F("toT", "Return time", <input id="toT" type="time" required className={fieldCls()} value={d.toT} onChange={(e) => setD({ ...d, toT: e.target.value })} />, undefined, true)}
           </div>
         )}

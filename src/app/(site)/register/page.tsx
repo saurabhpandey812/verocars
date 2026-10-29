@@ -1,5 +1,6 @@
 import { AuthShell } from "@/components/auth/AuthShell";
 import { AuthTabs } from "@/components/auth/AuthTabs";
+import { safeNextPath } from "@/lib/auth/safe-next";
 import { buildMetadata } from "@/lib/seo/metadata";
 
 export const metadata = buildMetadata({
@@ -9,10 +10,12 @@ export const metadata = buildMetadata({
   noindex: true,
 });
 
-export default function Page() {
+export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+  const p = await searchParams;
+  const next = safeNextPath(p.next);
   return (
     <AuthShell title="Join VEYRO CARS" intro="Create an account to send booking requests and track them in one place." eyebrow="VEYRO CARS">
-      <AuthTabs initial="signup" />
+      <AuthTabs initial="signup" next={next} />
     </AuthShell>
   );
 }
